@@ -1,0 +1,33 @@
+
+:root {
+  font-family: Arial, Helvetica, sans-serif;
+  color: #1c2938;
+  background: #f3f6fa;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+}
+
+h1, h2, h3 {
+  color: #163c53;
+}
+
+input, select, button {
+  font-family: inherit;
+  color: #1c2938;
+  background-color: #ffffff;
+}
+
+button {
+  cursor: pointer;
+}
