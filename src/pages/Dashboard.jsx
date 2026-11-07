@@ -1,67 +1,62 @@
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from "react";
+
 import { supabase } from "../services/supabaseClient";
 import { exportarInventarioExcel } from "../services/excelService";
 import Cotejo from "./Cotejo";
 import AgregarArticulo from "./AgregarArticulo";
 import "./Dashboard.css";
 
-// ==========================================
+// ========================================
 // FUNCIONES AUXILIARES
-// ==========================================
+// ========================================
 
-function mostrarDato(valor) {
-  if (
-    valor === null ||
-    valor === undefined ||
-    String(valor).trim() === ""
-  ) {
+function dato(valor) {
+  if (valor === null || valor === undefined || String(valor).trim() === "") {
     return "—";
   }
-
   return String(valor);
 }
 
-function datoPrincipal(verificado, original) {
-  return mostrarDato(verificado || original);
+function valorBien(verificado, original) {
+  return dato(verificado || original);
 }
 
-function claseEstado(estado) {
-  switch (estado) {
-    case "Localizado":
-      return "localizado";
-
-    case "No localizado":
-      return "no-localizado";
-
-    case "Con diferencias":
-      return "diferencias";
-
-    case "En revision":
-      return "revision";
-
-    default:
-      return "pendiente";
-  }
+function estadoNombre(estado) {
+  return estado === "En revision" ? "En revisión" : (estado || "Pendiente");
 }
 
-function nombreEstado(estado) {
-  if (estado === "En revision") return "En revisión";
-  return estado || "Pendiente";
+function estadoClase(estado) {
+  const clases = {
+    Pendiente: "pendiente",
+    "En revision": "revision",
+    Localizado: "localizado",
+    "No localizado": "no-localizado",
+    "Con diferencias": "diferencias"
+  };
+  return clases[estado] || "pendiente";
 }
 
-// ==========================================
-// COMPONENTE DASHBOARD
-// ==========================================
+const OPCIONES_PAGINA = [10, 20, 50];
+
+// ========================================
+// DASHBOARD PRINCIPAL
+// ========================================
 
 export default function Dashboard() {
-  // ESTADOS PRINCIPALES
-
   const [bienes, setBienes] = useState([]);
-
   const [busqueda, setBusqueda] = useState("");
   const [filtro, setFiltro] = useState("Todos");
   const [filtroOrigen, setFiltroOrigen] = useState("Todos");
+
+  const [pagina, setPagina] = useState(1);
+  const [porPagina, setPorPagina] = useState(10);
 
   const [cargando, setCargando] = useState(true);
   const [exportando, setExportando] = useState(false);
@@ -70,19 +65,14 @@ export default function Dashboard() {
   const [bienSeleccionado, setBienSeleccionado] = useState(null);
   const [mostrarAgregar, setMostrarAgregar] = useState(false);
 
-  const [conexionRealtime, setConexionRealtime] =
-    useState("Conectando");
+  const [conexionRealtime, setConexionRealtime] = useState("Conectando");
+  const [ultimaActualizacion, setUltimaActualizacion] = useState(null);
 
-  const [ultimaActualizacion, setUltimaActualizacion] =
-    useState(null);
-
-  // Evita que consultas anteriores reemplacen
-  // resultados más recientes.
   const numeroConsulta = useRef(0);
 
-  // ==========================================
-  // CONSULTAR INVENTARIO COMPLETO
-  // ==========================================
+  // ========================================
+  // CONSULTAR INVENTARIO
+  // ========================================
 
   const consultarInventario = useCallback(async () => {
     const registros = [];
@@ -96,34 +86,22 @@ export default function Dashboard() {
         .order("numero_inventario", { ascending: true })
         .range(inicio, inicio + tamanoPagina - 1);
 
-      if (consultaError) {
-        throw consultaError;
-      }
+      if (consultaError) throw consultaError;
 
       registros.push(...(data || []));
 
-      if (!data || data.length < tamanoPagina) {
-        break;
-      }
-
+      if (!data || data.length < tamanoPagina) break;
       inicio += tamanoPagina;
     }
 
     return registros;
   }, []);
 
-  // ==========================================
-  // CARGAR BIENES
-  // ==========================================
-
   const cargarBienes = useCallback(
     async (silencioso = false) => {
       const consultaActual = ++numeroConsulta.current;
 
-      if (!silencioso) {
-        setCargando(true);
-      }
-
+      if (!silencioso) setCargando(true);
       setError("");
 
       try {
@@ -135,17 +113,12 @@ export default function Dashboard() {
 
         setBienes(registros);
         setUltimaActualizacion(new Date());
-
         return true;
       } catch (err) {
         if (consultaActual === numeroConsulta.current) {
-          console.error("Error consultando inventario:", err);
-
-          setError(
-            err.message || "No se pudo cargar el inventario."
-          );
+          console.error("Error cargando inventario:", err);
+          setError(err.message || "No se pudo cargar el inventario.");
         }
-
         return false;
       } finally {
         if (consultaActual === numeroConsulta.current) {
@@ -156,9 +129,9 @@ export default function Dashboard() {
     [consultarInventario]
   );
 
-  // ==========================================
+  // ========================================
   // CARGA INICIAL
-  // ==========================================
+  // ========================================
 
   useEffect(() => {
     cargarBienes();
@@ -168,25 +141,21 @@ export default function Dashboard() {
     };
   }, [cargarBienes]);
 
-  // ==========================================
-  // SINCRONIZACIÓN SUPABASE REALTIME
-  // ==========================================
+  // ========================================
+  // SUPABASE REALTIME
+  // ========================================
 
   useEffect(() => {
     let activo = true;
     let temporizador = null;
 
-    function programarActualizacion() {
+    function actualizarDespuesDeEvento() {
       if (!activo) return;
 
-      if (temporizador) {
-        clearTimeout(temporizador);
-      }
+      clearTimeout(temporizador);
 
       temporizador = setTimeout(() => {
-        if (activo) {
-          cargarBienes(true);
-        }
+        if (activo) cargarBienes(true);
       }, 350);
     }
 
@@ -199,93 +168,65 @@ export default function Dashboard() {
           schema: "public",
           table: "bienes"
         },
-        (payload) => {
-          console.log(
-            "Cambio recibido:",
-            payload.eventType
-          );
-
-          programarActualizacion();
+        () => {
+          actualizarDespuesDeEvento();
         }
       )
-      .subscribe((estado, detalle) => {
+      .subscribe((estado) => {
         if (!activo) return;
-
-        console.log("Realtime:", estado, detalle);
 
         if (estado === "SUBSCRIBED") {
           setConexionRealtime("Conectado");
-          programarActualizacion();
+          actualizarDespuesDeEvento();
         }
 
-        if (
-          estado === "CHANNEL_ERROR" ||
-          estado === "TIMED_OUT" ||
-          estado === "CLOSED"
-        ) {
+        if (["CHANNEL_ERROR", "TIMED_OUT", "CLOSED"].includes(estado)) {
           setConexionRealtime("Desconectado");
         }
       });
 
     return () => {
       activo = false;
-
-      if (temporizador) {
-        clearTimeout(temporizador);
-      }
-
+      clearTimeout(temporizador);
       supabase.removeChannel(canal);
     };
   }, [cargarBienes]);
 
-  // ==========================================
+  // ========================================
   // ESTADÍSTICAS
-  // ==========================================
+  // ========================================
 
-  const estadisticas = useMemo(() => {
-    return {
-      total: bienes.length,
+  const estadisticas = useMemo(() => ({
+    total: bienes.length,
+    pendientes: bienes.filter(b => b.estado_cotejo === "Pendiente").length,
+    revision: bienes.filter(b => b.estado_cotejo === "En revision").length,
+    localizados: bienes.filter(b => b.estado_cotejo === "Localizado").length,
+    noLocalizados: bienes.filter(b => b.estado_cotejo === "No localizado").length,
+    diferencias: bienes.filter(b => b.estado_cotejo === "Con diferencias").length,
+    adicionales: bienes.filter(b => b.origen_registro !== "Original").length
+  }), [bienes]);
 
-      pendientes: bienes.filter(
-        b => b.estado_cotejo === "Pendiente"
-      ).length,
-
-      revision: bienes.filter(
-        b => b.estado_cotejo === "En revision"
-      ).length,
-
-      localizados: bienes.filter(
-        b => b.estado_cotejo === "Localizado"
-      ).length,
-
-      noLocalizados: bienes.filter(
-        b => b.estado_cotejo === "No localizado"
-      ).length,
-
-      diferencias: bienes.filter(
-        b => b.estado_cotejo === "Con diferencias"
-      ).length,
-
-      adicionales: bienes.filter(
-        b => b.origen_registro !== "Original"
-      ).length
-    };
-  }, [bienes]);
-
-  const cotejosFinalizados =
+  const finalizados =
     estadisticas.localizados +
     estadisticas.noLocalizados +
     estadisticas.diferencias;
 
   const porcentaje = estadisticas.total
-    ? Math.round(
-        (cotejosFinalizados / estadisticas.total) * 100
-      )
+    ? Math.round((finalizados / estadisticas.total) * 100)
     : 0;
 
-  // ==========================================
+  const tarjetas = [
+    ["Total de bienes", estadisticas.total, "total"],
+    ["Pendientes", estadisticas.pendientes, "pendientes"],
+    ["Localizados", estadisticas.localizados, "localizados"],
+    ["No localizados", estadisticas.noLocalizados, "no-localizados"],
+    ["Con diferencias", estadisticas.diferencias, "diferencias"],
+    ["Adicionales", estadisticas.adicionales, "adicionales"]
+  ];
+
+  // ========================================
   // BUSCADOR Y FILTROS
-  // ==========================================
+  // ========================================
 
   const bienesFiltrados = useMemo(() => {
     const texto = busqueda.toLowerCase().trim();
@@ -309,51 +250,126 @@ export default function Dashboard() {
         .join(" ")
         .toLowerCase();
 
-      const coincideBusqueda = contenido.includes(texto);
-
-      const coincideEstado =
-        filtro === "Todos" ||
-        b.estado_cotejo === filtro;
-
-      const coincideOrigen =
-        filtroOrigen === "Todos" ||
-        b.origen_registro === filtroOrigen;
-
       return (
-        coincideBusqueda &&
-        coincideEstado &&
-        coincideOrigen
+        contenido.includes(texto) &&
+        (filtro === "Todos" || b.estado_cotejo === filtro) &&
+        (filtroOrigen === "Todos" || b.origen_registro === filtroOrigen)
       );
     });
   }, [bienes, busqueda, filtro, filtroOrigen]);
 
-  // ==========================================
-  // GUARDAR COTEJO
-  // ==========================================
+  // ========================================
+  // PAGINACIÓN
+  // ========================================
+
+  const totalPaginas = Math.max(
+    1,
+    Math.ceil(bienesFiltrados.length / porPagina)
+  );
+
+  const paginaActual = Math.min(pagina, totalPaginas);
+  const inicio = (paginaActual - 1) * porPagina;
+
+  const bienesPagina = bienesFiltrados.slice(inicio, inicio + porPagina);
+
+  const primerRegistro = bienesFiltrados.length === 0 ? 0 : inicio + 1;
+  const ultimoRegistro = Math.min(inicio + porPagina, bienesFiltrados.length);
+
+  function cambiarFiltros(campo, valor) {
+    setPagina(1);
+
+    if (campo === "busqueda") setBusqueda(valor);
+    if (campo === "estado") setFiltro(valor);
+    if (campo === "origen") setFiltroOrigen(valor);
+  }
+
+  function renderPaginacion() {
+    if (!bienesFiltrados.length) return null;
+
+    return (
+      <div className="paginacion">
+        <div className="paginacion-info">
+          <span>
+            Mostrando {primerRegistro}–{ultimoRegistro} de{" "}
+            {bienesFiltrados.length}
+          </span>
+
+          <label className="paginacion-tamano">
+            Por página
+            <select
+              value={porPagina}
+              onChange={(e) => {
+                setPorPagina(Number(e.target.value));
+                setPagina(1);
+              }}
+            >
+              {OPCIONES_PAGINA.map(n => (
+                <option value={n} key={n}>{n}</option>
+              ))}
+            </select>
+          </label>
+        </div>
+
+        <nav className="paginacion-controles" aria-label="Paginación">
+          <button
+            type="button"
+            disabled={paginaActual === 1}
+            onClick={() => setPagina(1)}
+            aria-label="Primera página"
+          >
+            «
+          </button>
+
+          <button
+            type="button"
+            disabled={paginaActual === 1}
+            onClick={() => setPagina(paginaActual - 1)}
+            aria-label="Página anterior"
+          >
+            ‹
+          </button>
+
+          <span className="paginacion-indicador">
+            {paginaActual} / {totalPaginas}
+          </span>
+
+          <button
+            type="button"
+            disabled={paginaActual === totalPaginas}
+            onClick={() => setPagina(paginaActual + 1)}
+            aria-label="Página siguiente"
+          >
+            ›
+          </button>
+
+          <button
+            type="button"
+            disabled={paginaActual === totalPaginas}
+            onClick={() => setPagina(totalPaginas)}
+            aria-label="Última página"
+          >
+            »
+          </button>
+        </nav>
+      </div>
+    );
+  }
+
+  // ========================================
+  // GUARDADO Y EXPORTACIÓN
+  // ========================================
 
   async function cotejoGuardado() {
-    const actualizado = await cargarBienes(true);
-
-    if (actualizado) {
+    if (await cargarBienes(true)) {
       setBienSeleccionado(null);
     }
   }
 
-  // ==========================================
-  // AGREGAR ARTÍCULO
-  // ==========================================
-
   async function articuloGuardado() {
-    const actualizado = await cargarBienes(true);
-
-    if (actualizado) {
+    if (await cargarBienes(true)) {
       setMostrarAgregar(false);
     }
   }
-
-  // ==========================================
-  // EXPORTAR EXCEL
-  // ==========================================
 
   async function descargarExcel() {
     setExportando(true);
@@ -361,59 +377,18 @@ export default function Dashboard() {
 
     try {
       const registros = await consultarInventario();
-
       await exportarInventarioExcel(registros);
     } catch (err) {
-      console.error("Error exportando Excel:", err);
-
-      setError(
-        err.message || "No se pudo generar el Excel."
-      );
+      console.error("Error exportando:", err);
+      setError(err.message || "No se pudo generar el Excel.");
     } finally {
       setExportando(false);
     }
   }
 
-  // ==========================================
-  // TARJETAS DE ESTADÍSTICAS
-  // ==========================================
-
-  const tarjetas = [
-    {
-      titulo: "Total de bienes",
-      valor: estadisticas.total,
-      tipo: "total"
-    },
-    {
-      titulo: "Pendientes",
-      valor: estadisticas.pendientes,
-      tipo: "pendientes"
-    },
-    {
-      titulo: "Localizados",
-      valor: estadisticas.localizados,
-      tipo: "localizados"
-    },
-    {
-      titulo: "No localizados",
-      valor: estadisticas.noLocalizados,
-      tipo: "no-localizados"
-    },
-    {
-      titulo: "Con diferencias",
-      valor: estadisticas.diferencias,
-      tipo: "diferencias"
-    },
-    {
-      titulo: "Adicionales",
-      valor: estadisticas.adicionales,
-      tipo: "adicionales"
-    }
-  ];
-
-  // ==========================================
+  // ========================================
   // INTERFAZ
-  // ==========================================
+  // ========================================
 
   return (
     <main className="dashboard">
@@ -422,13 +397,8 @@ export default function Dashboard() {
 
       <header className="encabezado">
         <div className="encabezado-informacion">
-
-          <span className="subtitulo">
-            Control patrimonial
-          </span>
-
+          <span className="subtitulo">CONTROL PATRIMONIAL</span>
           <h1>Inventario BUAP</h1>
-
           <p>Panel de verificación de bienes</p>
 
           <div className="realtime-indicador">
@@ -439,10 +409,7 @@ export default function Dashboard() {
                   : "realtime-punto desconectado"
               }
             />
-
-            <span>
-              Sincronización: {conexionRealtime}
-            </span>
+            <span>Sincronización: {conexionRealtime}</span>
           </div>
 
           {ultimaActualizacion && (
@@ -453,10 +420,7 @@ export default function Dashboard() {
           )}
         </div>
 
-        {/* BOTONES PRINCIPALES */}
-
         <div className="acciones-encabezado">
-
           <button
             type="button"
             className="btn-secundario"
@@ -468,49 +432,39 @@ export default function Dashboard() {
           <button
             type="button"
             className="btn-exportar"
-            onClick={descargarExcel}
             disabled={exportando || cargando}
+            onClick={descargarExcel}
           >
-            {exportando
-              ? "Generando Excel..."
-              : "Exportar Excel"}
+            {exportando ? "Generando Excel..." : "Exportar Excel"}
           </button>
 
           <button
             type="button"
             className="btn-actualizar"
-            onClick={() => cargarBienes()}
             disabled={cargando}
+            onClick={() => cargarBienes()}
           >
             {cargando ? "Actualizando..." : "Actualizar"}
           </button>
-
         </div>
       </header>
 
-      {/* ERRORES */}
+      {/* ERROR */}
 
-      {error && (
-        <div className="error" role="alert">
-          {error}
-        </div>
-      )}
+      {error && <div className="error" role="alert">{error}</div>}
 
-      {/* ESTADÍSTICAS */}
+      {/* TARJETAS DE ESTADÍSTICAS */}
 
       <section className="estadisticas">
-        {tarjetas.map(tarjeta => (
-          <div
-            className={`tarjeta tarjeta-${tarjeta.tipo}`}
-            key={tarjeta.titulo}
-          >
-            <span>{tarjeta.titulo}</span>
-            <strong>{tarjeta.valor}</strong>
+        {tarjetas.map(([titulo, valor, tipo]) => (
+          <div key={tipo} className={`tarjeta tarjeta-${tipo}`}>
+            <span>{titulo}</span>
+            <strong>{valor}</strong>
           </div>
         ))}
       </section>
 
-      {/* BARRA DE PROGRESO */}
+      {/* PROGRESO */}
 
       <section className="panel">
         <div className="panel-titulo">
@@ -522,34 +476,22 @@ export default function Dashboard() {
           className="barra"
           role="progressbar"
           aria-label="Avance del cotejo"
-          aria-valuenow={porcentaje}
           aria-valuemin={0}
           aria-valuemax={100}
+          aria-valuenow={porcentaje}
         >
-          <div
-            style={{
-              width: `${porcentaje}%`
-            }}
-          />
+          <div style={{ width: `${porcentaje}%` }} />
         </div>
 
-        <p>
-          {cotejosFinalizados} de {estadisticas.total} bienes
-          con cotejo finalizado.
-        </p>
-
-        <p>
-          {estadisticas.revision} bienes en revisión.
-        </p>
+        <p>{finalizados} de {estadisticas.total} bienes con cotejo finalizado.</p>
+        <p>{estadisticas.revision} bienes en revisión.</p>
       </section>
 
-      {/* LISTADO */}
+      {/* INVENTARIO */}
 
       <section className="panel panel-inventario">
-
         <div className="panel-titulo">
           <h2>Listado de bienes</h2>
-
           <span className="contador-resultados">
             {bienesFiltrados.length} resultados
           </span>
@@ -558,19 +500,18 @@ export default function Dashboard() {
         {/* FILTROS */}
 
         <div className="herramientas">
-
           <input
             type="search"
-            aria-label="Buscar artículos"
-            placeholder="Buscar inventario, descripción, modelo o serie..."
             value={busqueda}
-            onChange={e => setBusqueda(e.target.value)}
+            onChange={e => cambiarFiltros("busqueda", e.target.value)}
+            placeholder="Buscar inventario, descripción, modelo o serie..."
+            aria-label="Buscar bienes"
           />
 
           <select
-            aria-label="Filtrar por estado"
             value={filtro}
-            onChange={e => setFiltro(e.target.value)}
+            onChange={e => cambiarFiltros("estado", e.target.value)}
+            aria-label="Filtrar por estado"
           >
             <option value="Todos">Todos los estados</option>
             <option value="Pendiente">Pendientes</option>
@@ -581,28 +522,24 @@ export default function Dashboard() {
           </select>
 
           <select
-            aria-label="Filtrar por origen"
             value={filtroOrigen}
-            onChange={e => setFiltroOrigen(e.target.value)}
+            onChange={e => cambiarFiltros("origen", e.target.value)}
+            aria-label="Filtrar por origen"
           >
             <option value="Todos">Todos los orígenes</option>
             <option value="Original">Inventario original</option>
-            <option value="Encontrado adicional">
-              Encontrados adicionales
-            </option>
+            <option value="Encontrado adicional">Encontrados adicionales</option>
             <option value="Alta nueva">Altas nuevas</option>
           </select>
         </div>
 
         {cargando ? (
-          <p className="mensaje-carga">
-            Cargando inventario...
-          </p>
+          <p className="mensaje-carga">Cargando inventario...</p>
         ) : (
           <>
-            {/* ================================
-                VISTA DE COMPUTADORA
-            ================================= */}
+            {renderPaginacion()}
+
+            {/* TABLA PARA COMPUTADORAS */}
 
             <div className="tabla-contenedor">
               <table>
@@ -615,67 +552,25 @@ export default function Dashboard() {
                     <th>Serie</th>
                     <th>Ubicación</th>
                     <th>Estado</th>
-                    <th>Acciones</th>
+                    <th className="columna-acciones">Acciones</th>
                   </tr>
                 </thead>
 
                 <tbody>
-                  {bienesFiltrados.map(b => (
+                  {bienesPagina.map(b => (
                     <tr key={b.numero_inventario}>
+                      <td><strong>{b.numero_inventario}</strong></td>
+                      <td>{valorBien(b.descripcion_verificada, b.descripcion_original)}</td>
+                      <td>{valorBien(b.marca_verificada, b.marca_original)}</td>
+                      <td>{valorBien(b.modelo_verificado, b.modelo_original)}</td>
+                      <td>{valorBien(b.serie_verificada, b.serie_original)}</td>
+                      <td>{valorBien(b.ubicacion_verificada, b.ubicacion_original)}</td>
                       <td>
-                        <strong>
-                          {b.numero_inventario}
-                        </strong>
-                      </td>
-
-                      <td>
-                        {datoPrincipal(
-                          b.descripcion_verificada,
-                          b.descripcion_original
-                        )}
-                      </td>
-
-                      <td>
-                        {datoPrincipal(
-                          b.marca_verificada,
-                          b.marca_original
-                        )}
-                      </td>
-
-                      <td>
-                        {datoPrincipal(
-                          b.modelo_verificado,
-                          b.modelo_original
-                        )}
-                      </td>
-
-                      <td>
-                        {datoPrincipal(
-                          b.serie_verificada,
-                          b.serie_original
-                        )}
-                      </td>
-
-                      <td>
-                        {datoPrincipal(
-                          b.ubicacion_verificada,
-                          b.ubicacion_original
-                        )}
-                      </td>
-
-                      <td>
-                        <span
-                          className={
-                            `estado estado-${claseEstado(
-                              b.estado_cotejo
-                            )}`
-                          }
-                        >
-                          {nombreEstado(b.estado_cotejo)}
+                        <span className={`estado estado-${estadoClase(b.estado_cotejo)}`}>
+                          {estadoNombre(b.estado_cotejo)}
                         </span>
                       </td>
-
-                      <td>
+                      <td className="columna-acciones">
                         <button
                           type="button"
                           className="btn-cotejar"
@@ -687,7 +582,7 @@ export default function Dashboard() {
                     </tr>
                   ))}
 
-                  {bienesFiltrados.length === 0 && (
+                  {bienesPagina.length === 0 && (
                     <tr>
                       <td colSpan="8" className="sin-resultados">
                         No se encontraron bienes.
@@ -698,98 +593,44 @@ export default function Dashboard() {
               </table>
             </div>
 
-            {/* ================================
-                VISTA MÓVIL CON TARJETAS
-            ================================= */}
+            {/* TARJETAS PARA CELULARES */}
 
             <div className="inventario-movil">
-
-              {bienesFiltrados.map(b => (
-                <article
-                  className="bien-tarjeta"
-                  key={b.numero_inventario}
-                >
-
-                  {/* ENCABEZADO DE TARJETA */}
-
+              {bienesPagina.map(b => (
+                <article className="bien-tarjeta" key={b.numero_inventario}>
                   <div className="bien-tarjeta-encabezado">
                     <div className="bien-identificacion">
-                      <span className="bien-etiqueta">
-                        N.º DE INVENTARIO
-                      </span>
-
-                      <strong className="bien-numero">
-                        {b.numero_inventario}
-                      </strong>
+                      <span className="bien-etiqueta">N.º DE INVENTARIO</span>
+                      <strong className="bien-numero">{b.numero_inventario}</strong>
                     </div>
 
-                    <span
-                      className={
-                        `estado estado-${claseEstado(
-                          b.estado_cotejo
-                        )}`
-                      }
-                    >
-                      {nombreEstado(b.estado_cotejo)}
+                    <span className={`estado estado-${estadoClase(b.estado_cotejo)}`}>
+                      {estadoNombre(b.estado_cotejo)}
                     </span>
                   </div>
 
-                  {/* DESCRIPCIÓN */}
-
                   <div className="bien-tarjeta-cuerpo">
-                    <h3>
-                      {datoPrincipal(
-                        b.descripcion_verificada,
-                        b.descripcion_original
-                      )}
-                    </h3>
+                    <h3>{valorBien(b.descripcion_verificada, b.descripcion_original)}</h3>
 
                     <div className="bien-datos">
-
                       <div className="bien-dato">
                         <span>Marca</span>
-                        <strong>
-                          {datoPrincipal(
-                            b.marca_verificada,
-                            b.marca_original
-                          )}
-                        </strong>
+                        <strong>{valorBien(b.marca_verificada, b.marca_original)}</strong>
                       </div>
-
                       <div className="bien-dato">
                         <span>Modelo</span>
-                        <strong>
-                          {datoPrincipal(
-                            b.modelo_verificado,
-                            b.modelo_original
-                          )}
-                        </strong>
+                        <strong>{valorBien(b.modelo_verificado, b.modelo_original)}</strong>
                       </div>
-
                       <div className="bien-dato">
                         <span>Número de serie</span>
-                        <strong>
-                          {datoPrincipal(
-                            b.serie_verificada,
-                            b.serie_original
-                          )}
-                        </strong>
+                        <strong>{valorBien(b.serie_verificada, b.serie_original)}</strong>
                       </div>
-
                       <div className="bien-dato">
                         <span>Ubicación</span>
-                        <strong>
-                          {datoPrincipal(
-                            b.ubicacion_verificada,
-                            b.ubicacion_original
-                          )}
-                        </strong>
+                        <strong>{valorBien(b.ubicacion_verificada, b.ubicacion_original)}</strong>
                       </div>
-
                     </div>
                   </div>
-
-                  {/* INFORMACIÓN ADICIONAL */}
 
                   <div className="bien-tarjeta-pie">
                     <div className="bien-meta">
@@ -798,11 +639,8 @@ export default function Dashboard() {
                           ? "Inventario original"
                           : b.origen_registro || "Adicional"}
                       </span>
-
                       <span>
-                        {b.datos_completos
-                          ? "Datos completos"
-                          : "Datos por completar"}
+                        {b.datos_completos ? "Datos completos" : "Datos por completar"}
                       </span>
                     </div>
 
@@ -814,22 +652,22 @@ export default function Dashboard() {
                       Cotejar artículo
                     </button>
                   </div>
-
                 </article>
               ))}
 
-              {bienesFiltrados.length === 0 && (
+              {bienesPagina.length === 0 && (
                 <div className="sin-resultados-movil">
-                  No se encontraron artículos con esos filtros.
+                  No se encontraron artículos.
                 </div>
               )}
-
             </div>
+
+            {renderPaginacion()}
           </>
         )}
       </section>
 
-      {/* FORMULARIO DE COTEJO */}
+      {/* FORMULARIOS */}
 
       {bienSeleccionado && (
         <Cotejo
@@ -839,8 +677,6 @@ export default function Dashboard() {
           onGuardado={cotejoGuardado}
         />
       )}
-
-      {/* FORMULARIO AGREGAR ARTÍCULO */}
 
       {mostrarAgregar && (
         <AgregarArticulo

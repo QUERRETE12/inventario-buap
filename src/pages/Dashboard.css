@@ -1,8 +1,10 @@
 
 /* ==========================================
-   INVENTARIO BUAP
-   DASHBOARD RESPONSIVE
+   INVENTARIO BUAP - DASHBOARD V4
+   ESCRITORIO + CELULAR + PAGINACIÓN
 ========================================== */
+
+/* BASE */
 
 .dashboard,
 .dashboard * {
@@ -13,14 +15,19 @@
   width: 100%;
   max-width: 1600px;
   margin: 0 auto;
-  padding: 30px;
-  color: #1c2938;
+  padding: 28px;
   font-family: Arial, Helvetica, sans-serif;
+  color: #1c2938;
+  text-align: left;
 }
 
-/* ==========================================
-   ENCABEZADO
-========================================== */
+.dashboard button,
+.dashboard input,
+.dashboard select {
+  font-family: inherit;
+}
+
+/* ENCABEZADO */
 
 .encabezado {
   display: flex;
@@ -36,92 +43,89 @@
 
 .subtitulo {
   display: block;
-  color: #087e85;
   font-size: 12px;
   font-weight: 700;
-  letter-spacing: 1px;
+  color: #087e85;
   text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .encabezado h1 {
-  color: #163c53;
-  font-size: 32px;
   margin: 8px 0;
+  font-size: 32px;
   line-height: 1.2;
+  color: #163c53;
 }
 
 .encabezado p {
-  color: #687588;
   margin: 0;
   font-size: 15px;
+  color: #687588;
 }
 
-/* ==========================================
-   BOTONES PRINCIPALES
-========================================== */
+/* BOTONES DEL ENCABEZADO */
 
 .acciones-encabezado {
   display: flex;
-  align-items: center;
   justify-content: flex-end;
-  gap: 10px;
+  align-items: center;
   flex-wrap: wrap;
+  gap: 10px;
 }
 
-.btn-secundario,
-.btn-actualizar,
-.btn-exportar,
-.btn-cotejar {
+.dashboard .btn-secundario,
+.dashboard .btn-exportar,
+.dashboard .btn-actualizar,
+.dashboard .btn-cotejar {
   display: inline-flex;
   justify-content: center;
   align-items: center;
-  gap: 8px;
-  min-height: 42px;
-  padding: 11px 17px;
+  width: auto;
+  min-width: 0;
+  min-height: 43px;
+  padding: 11px 16px;
   border: none;
   border-radius: 9px;
-  color: #ffffff;
-  font-family: inherit;
   font-size: 14px;
   font-weight: 600;
   line-height: 1.3;
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+  word-break: normal;
+  overflow-wrap: normal;
   cursor: pointer;
-  transition:
-    background 0.2s ease,
-    opacity 0.2s ease;
+  transition: background 0.2s ease;
 }
 
-.btn-secundario,
-.btn-actualizar,
-.btn-cotejar {
+.dashboard .btn-secundario,
+.dashboard .btn-actualizar,
+.dashboard .btn-cotejar {
   background: #087e85;
+  color: #ffffff;
 }
 
-.btn-secundario:hover,
-.btn-actualizar:hover,
-.btn-cotejar:hover {
+.dashboard .btn-secundario:hover,
+.dashboard .btn-actualizar:hover,
+.dashboard .btn-cotejar:hover {
   background: #05666c;
 }
 
-.btn-exportar {
+.dashboard .btn-exportar {
   background: #16804a;
+  color: #ffffff;
 }
 
-.btn-exportar:hover {
+.dashboard .btn-exportar:hover {
   background: #106638;
 }
 
-.btn-secundario:disabled,
-.btn-actualizar:disabled,
-.btn-exportar:disabled,
-.btn-cotejar:disabled {
-  opacity: 0.55;
+.dashboard button:disabled {
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
-/* ==========================================
-   SINCRONIZACIÓN REALTIME
-========================================== */
+/* REALTIME */
 
 .realtime-indicador {
   display: flex;
@@ -134,10 +138,10 @@
 
 .realtime-punto {
   display: inline-block;
+  flex-shrink: 0;
   width: 9px;
   height: 9px;
   border-radius: 50%;
-  flex-shrink: 0;
 }
 
 .realtime-punto.conectado {
@@ -151,14 +155,12 @@
 }
 
 .encabezado .realtime-fecha {
-  color: #64748b;
   margin-top: 8px;
   font-size: 12px;
+  color: #64748b;
 }
 
-/* ==========================================
-   TARJETAS DE ESTADÍSTICAS
-========================================== */
+/* TARJETAS DE ESTADÍSTICAS */
 
 .estadisticas {
   display: grid;
@@ -169,125 +171,117 @@
 
 .tarjeta {
   min-width: 0;
+  padding: 23px;
   background: #ffffff;
   border: 1px solid #e3eaf0;
   border-radius: 14px;
-  padding: 23px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
 }
 
 .tarjeta span {
   display: block;
-  color: #64748b;
   font-size: 14px;
+  color: #64748b;
 }
 
 .tarjeta strong {
   display: block;
   margin-top: 12px;
-  color: #163c53;
   font-size: 33px;
   font-weight: 700;
+  color: #163c53;
 }
 
-/* ==========================================
-   PANELES
-========================================== */
+/* PANELES */
 
 .panel {
+  margin-bottom: 22px;
+  padding: 24px;
   background: #ffffff;
   border: 1px solid #e3eaf0;
   border-radius: 15px;
-  padding: 24px;
-  margin-bottom: 22px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
 }
 
 .panel-titulo {
   display: flex;
-  align-items: center;
   justify-content: space-between;
+  align-items: center;
   gap: 12px;
   margin-bottom: 18px;
 }
 
 .panel-titulo h2 {
   margin: 0;
-  color: #163c53;
   font-size: 20px;
-  line-height: 1.3;
+  color: #163c53;
 }
 
 .panel-titulo strong {
-  color: #163c53;
   font-size: 18px;
+  color: #163c53;
 }
 
 .panel p {
-  color: #687588;
   font-size: 14px;
+  line-height: 1.5;
+  color: #687588;
 }
 
 .contador-resultados {
-  color: #526477;
   font-size: 14px;
+  color: #526477;
   white-space: nowrap;
 }
 
-/* ==========================================
-   BARRA DE PROGRESO
-========================================== */
+/* AVANCE */
 
 .barra {
   width: 100%;
   height: 12px;
-  border-radius: 20px;
   overflow: hidden;
+  border-radius: 20px;
   background: #e5ecf1;
 }
 
 .barra > div {
   height: 100%;
-  border-radius: 20px;
   background: #12a596;
+  border-radius: 20px;
   transition: width 0.3s ease;
 }
 
-/* ==========================================
-   BUSCADOR Y FILTROS
-========================================== */
+/* BUSCADOR Y FILTROS */
 
 .herramientas {
   display: flex;
   align-items: stretch;
   gap: 12px;
-  margin-bottom: 20px;
+  margin-bottom: 18px;
 }
 
 .herramientas input,
 .herramientas select {
   display: block;
   height: 46px;
+  min-width: 0;
   margin: 0;
   padding: 10px 12px;
   border: 1px solid #d2dce5;
   border-radius: 9px;
   background: #ffffff;
   color: #1c2938;
-  font-family: inherit;
   font-size: 14px;
   outline: none;
 }
 
 .herramientas input {
   flex: 1;
-  min-width: 0;
 }
 
 .herramientas select {
+  flex: 0 0 205px;
   width: 205px;
-  min-width: 0;
-  flex-shrink: 0;
 }
 
 .herramientas input::placeholder {
@@ -300,19 +294,19 @@
   box-shadow: 0 0 0 3px rgba(8, 126, 133, 0.12);
 }
 
-/* ==========================================
-   TABLA DE COMPUTADORA
-========================================== */
+/* TABLA DE ESCRITORIO */
 
 .tabla-contenedor {
+  display: block;
   width: 100%;
   overflow-x: auto;
 }
 
 .tabla-contenedor table {
   width: 100%;
-  min-width: 1050px;
+  min-width: 1120px;
   border-collapse: collapse;
+  table-layout: auto;
   text-align: left;
   font-size: 13px;
 }
@@ -340,14 +334,25 @@
   background: #f8fafc;
 }
 
-/* ==========================================
-   ETIQUETAS DE ESTADO
-========================================== */
+.tabla-contenedor .columna-acciones {
+  width: 135px;
+  min-width: 135px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.dashboard .tabla-contenedor .btn-cotejar {
+  min-width: 100px;
+  padding: 10px 16px;
+  white-space: nowrap;
+}
+
+/* ETIQUETAS DE ESTADO */
 
 .estado {
   display: inline-flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
   padding: 7px 11px;
   border-radius: 20px;
   font-size: 12px;
@@ -359,6 +364,11 @@
 .estado-pendiente {
   background: #edf2f7;
   color: #475569;
+}
+
+.estado-revision {
+  background: #dbeafe;
+  color: #1d4ed8;
 }
 
 .estado-localizado {
@@ -376,46 +386,103 @@
   color: #92400e;
 }
 
-.estado-revision {
-  background: #dbeafe;
-  color: #1d4ed8;
+/* PAGINACIÓN */
+
+.paginacion {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  padding: 14px 0;
 }
 
-/* ==========================================
-   VISTA MÓVIL
-   OCULTA EN COMPUTADORA
-========================================== */
-
-.inventario-movil {
-  display: none;
+.paginacion-info {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  font-size: 13px;
+  color: #475569;
 }
 
-/* ==========================================
-   MENSAJES
-========================================== */
+.paginacion-tamano {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.paginacion-tamano select {
+  width: 70px;
+  height: 36px;
+  padding: 6px;
+  background: #ffffff;
+  color: #1c2938;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.paginacion-controles {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.dashboard .paginacion-controles button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  min-height: 36px;
+  padding: 0;
+  background: #ffffff;
+  color: #163c53;
+  border: 1px solid #d5e0e8;
+  border-radius: 8px;
+  font-size: 21px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.dashboard .paginacion-controles button:hover:not(:disabled) {
+  background: #e8f5f5;
+  color: #087e85;
+  border-color: #087e85;
+}
+
+.paginacion-indicador {
+  min-width: 65px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: #163c53;
+}
+
+/* MENSAJES */
 
 .error {
   padding: 14px;
   margin-bottom: 18px;
   background: #fee2e2;
-  border-radius: 10px;
   color: #b91c1c;
+  border-radius: 10px;
   font-size: 14px;
 }
 
-.mensaje-carga {
-  text-align: center;
-  padding: 25px;
-}
-
+.mensaje-carga,
 .sin-resultados {
+  padding: 25px;
   text-align: center;
-  padding: 30px !important;
-  color: #64748b !important;
+  color: #64748b;
 }
 
 .sin-resultados-movil {
-  padding: 30px 16px;
+  padding: 25px 16px;
   text-align: center;
   color: #64748b;
   background: #ffffff;
@@ -423,9 +490,13 @@
   border-radius: 12px;
 }
 
-/* ==========================================
-   TABLETS
-========================================== */
+/* VISTA MÓVIL OCULTA EN ESCRITORIO */
+
+.inventario-movil {
+  display: none;
+}
+
+/* TABLETS */
 
 @media (max-width: 1100px) {
   .dashboard {
@@ -453,25 +524,17 @@
   }
 }
 
-/* ==========================================
-   CELULARES
-========================================== */
+/* CELULARES */
 
 @media (max-width: 768px) {
-
-  /* CONTENEDOR GENERAL */
-
   .dashboard {
-    max-width: 100%;
-    padding: 15px;
+    padding: 14px;
   }
-
-  /* ENCABEZADO */
 
   .encabezado {
     flex-direction: column;
     align-items: stretch;
-    gap: 20px;
+    gap: 18px;
     margin-bottom: 20px;
   }
 
@@ -481,40 +544,32 @@
 
   .encabezado h1 {
     font-size: 26px;
-    margin: 7px 0;
   }
 
   .encabezado p {
     font-size: 13px;
   }
 
-  .realtime-indicador {
-    margin-top: 12px;
-    font-size: 12px;
-  }
-
-  /* BOTONES SUPERIORES */
-
   .acciones-encabezado {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 9px;
     width: 100%;
   }
 
-  .acciones-encabezado button {
+  .dashboard .acciones-encabezado button {
     width: 100%;
     min-width: 0;
-    padding: 12px 8px;
-    min-height: 46px;
-    font-size: 13px;
+    padding: 12px 7px;
+    font-size: 12px;
+    white-space: normal;
   }
 
-  .acciones-encabezado .btn-secundario {
+  .dashboard .acciones-encabezado .btn-secundario {
     grid-column: 1 / -1;
   }
 
-  /* ESTADÍSTICAS */
+  /* ESTADÍSTICAS MÓVILES */
 
   .estadisticas {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -547,7 +602,6 @@
 
   .panel-titulo {
     align-items: flex-start;
-    gap: 10px;
   }
 
   .panel-titulo h2 {
@@ -560,7 +614,6 @@
 
   .panel p {
     font-size: 12px;
-    line-height: 1.5;
   }
 
   /* FILTROS */
@@ -569,32 +622,27 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
-    margin-bottom: 18px;
   }
 
   .herramientas input,
   .herramientas select {
+    flex: none;
     width: 100%;
     height: 47px;
-    flex: none;
     font-size: 14px;
   }
 
-  /* OCULTAR TABLA DE COMPUTADORA */
+  /* OCULTAR TABLA, MOSTRAR TARJETAS */
 
   .tabla-contenedor {
     display: none;
   }
-
-  /* MOSTRAR TARJETAS MÓVILES */
 
   .inventario-movil {
     display: flex;
     flex-direction: column;
     gap: 14px;
   }
-
-  /* TARJETA DE ARTÍCULO */
 
   .bien-tarjeta {
     width: 100%;
@@ -603,17 +651,15 @@
     border: 1px solid #dce6ed;
     border-radius: 14px;
     overflow: hidden;
-    box-shadow: 0 3px 12px rgba(0,0,0,0.035);
+    box-shadow: 0 3px 12px rgba(0,0,0,0.04);
   }
-
-  /* ENCABEZADO DE TARJETA */
 
   .bien-tarjeta-encabezado {
     display: flex;
-    align-items: flex-start;
     justify-content: space-between;
+    align-items: flex-start;
     gap: 8px;
-    padding: 16px;
+    padding: 15px;
     border-bottom: 1px solid #edf1f5;
   }
 
@@ -638,30 +684,28 @@
   }
 
   .bien-tarjeta-encabezado .estado {
-    max-width: 52%;
-    font-size: 10px;
-    padding: 7px 9px;
+    max-width: 50%;
     white-space: normal;
     text-align: center;
+    font-size: 10px;
+    padding: 7px 9px;
   }
 
-  /* CUERPO */
-
   .bien-tarjeta-cuerpo {
-    padding: 16px;
+    padding: 15px;
   }
 
   .bien-tarjeta-cuerpo h3 {
+    margin: 0 0 18px;
     color: #163c53;
     font-size: 18px;
     line-height: 1.35;
-    margin: 0 0 18px;
     overflow-wrap: anywhere;
   }
 
   .bien-datos {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 16px 12px;
   }
 
@@ -680,15 +724,13 @@
   .bien-dato strong {
     color: #334155;
     font-size: 13px;
-    font-weight: 600;
     line-height: 1.4;
+    font-weight: 600;
     overflow-wrap: anywhere;
   }
 
-  /* PIE DE TARJETA */
-
   .bien-tarjeta-pie {
-    padding: 14px 16px 16px;
+    padding: 14px 15px 15px;
     background: #f8fafc;
     border-top: 1px solid #edf1f5;
   }
@@ -696,9 +738,8 @@
   .bien-meta {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
-    flex-wrap: wrap;
     gap: 8px;
+    flex-wrap: wrap;
     margin-bottom: 14px;
   }
 
@@ -707,38 +748,46 @@
     font-size: 11px;
   }
 
-  .btn-cotejar-movil {
+  .dashboard .btn-cotejar-movil {
     width: 100%;
     min-height: 48px;
-    border-radius: 10px;
     font-size: 14px;
-    font-weight: 700;
+    white-space: nowrap;
   }
 
-  /* MENSAJE SIN RESULTADOS */
+  /* PAGINACIÓN MÓVIL */
 
-  .sin-resultados-movil {
-    font-size: 13px;
+  .paginacion {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding: 15px 0;
+  }
+
+  .paginacion-info {
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 12px;
+  }
+
+  .paginacion-controles {
+    justify-content: center;
+  }
+
+  .dashboard .paginacion-controles button {
+    width: 40px;
+    height: 40px;
   }
 }
 
-/* ==========================================
-   CELULARES MUY PEQUEÑOS
-========================================== */
+/* CELULARES PEQUEÑOS */
 
 @media (max-width: 370px) {
   .dashboard {
     padding: 10px;
   }
 
-  .tarjeta {
-    padding: 12px;
-  }
-
-  .tarjeta strong {
-    font-size: 25px;
-  }
-
+  .tarjeta,
   .panel {
     padding: 12px;
   }
@@ -748,12 +797,14 @@
     gap: 12px;
   }
 
-  .bien-tarjeta-encabezado {
-    padding: 12px;
-  }
-
+  .bien-tarjeta-encabezado,
   .bien-tarjeta-cuerpo,
   .bien-tarjeta-pie {
     padding: 12px;
+  }
+
+  .paginacion-info {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }
