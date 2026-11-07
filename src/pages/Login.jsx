@@ -1,10 +1,79 @@
-
 import { useState } from "react";
 import { supabase } from "../services/supabaseClient";
+import "./Login.css";
+
+function IconoOjo() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      className="login-icono-ojo-svg"
+    >
+      <path
+        d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <circle
+        cx="12"
+        cy="12"
+        r="3"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      />
+    </svg>
+  );
+}
+
+function IconoOjoOculto() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      className="login-icono-ojo-svg"
+    >
+      <path
+        d="M3 3l18 18"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+      <path
+        d="M10.6 10.7A3 3 0 0 0 13.3 13.4"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+      <path
+        d="M9.9 5.2A11.2 11.2 0 0 1 12 5c6.5 0 10 7 10 7a17.6 17.6 0 0 1-4 4.7"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M6.2 6.3A18.2 18.2 0 0 0 2 12s3.5 7 10 7a10.7 10.7 0 0 0 4-.8"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
 
 export default function Login({ onLogin }) {
   const [correo, setCorreo] = useState("");
   const [password, setPassword] = useState("");
+  const [mostrarPassword, setMostrarPassword] = useState(false);
   const [error, setError] = useState("");
   const [cargando, setCargando] = useState(false);
 
@@ -13,82 +82,101 @@ export default function Login({ onLogin }) {
     setError("");
     setCargando(true);
 
-    const { error: loginError } =
-      await supabase.auth.signInWithPassword({
-        email: correo,
-        password
-      });
+    try {
+      const { error: loginError } =
+        await supabase.auth.signInWithPassword({
+          email: correo.trim(),
+          password
+        });
 
-    if (loginError) {
-      setError(loginError.message);
-    } else {
-      onLogin();
+      if (loginError) {
+        throw loginError;
+      }
+
+      if (onLogin) {
+        onLogin();
+      }
+    } catch (err) {
+      console.error("Error al iniciar sesión:", err);
+      setError("Correo o contraseña incorrectos.");
+    } finally {
+      setCargando(false);
     }
-
-    setCargando(false);
   }
 
   return (
-    <div style={{
-      minHeight: "100vh",
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      background: "#f3f6fa",
-      padding: "20px"
-    }}>
-      <form
-        onSubmit={iniciarSesion}
-        style={{
-          background: "white",
-          padding: "35px",
-          borderRadius: "15px",
-          width: "100%",
-          maxWidth: "400px",
-          boxShadow: "0 5px 25px #00000012"
-        }}
-      >
-        <h1 style={{ color: "#087e85" }}>
-          Inventario BUAP
-        </h1>
+    <div className="login-fondo">
+      <form className="login-tarjeta" onSubmit={iniciarSesion}>
+        <div className="login-encabezado">
+          <div className="login-logo">BUAP</div>
+          <h1>Inventario BUAP</h1>
+          <p>Acceso al sistema de cotejo patrimonial</p>
+        </div>
 
-        <p>Acceso al sistema de cotejo</p>
+        <div className="login-campo">
+          <label htmlFor="correo">Correo electrónico</label>
+          <input
+            id="correo"
+            type="email"
+            autoComplete="username"
+            value={correo}
+            onChange={(e) => setCorreo(e.target.value)}
+            placeholder="correo@ejemplo.com"
+            required
+          />
+        </div>
 
-        <label>Correo electrónico</label>
-        <input
-          type="email"
-          value={correo}
-          onChange={e => setCorreo(e.target.value)}
-          required
-          style={{ width: "100%", margin: "10px 0 20px" }}
-        />
+        <div className="login-campo">
+          <label htmlFor="password">Contraseña</label>
 
-        <label>Contraseña</label>
-        <input
-          type="password"
-          value={password}
-          onChange={e => setPassword(e.target.value)}
-          required
-          style={{ width: "100%", margin: "10px 0 20px" }}
-        />
+          <div className="login-password">
+            <input
+              id="password"
+              type={mostrarPassword ? "text" : "password"}
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Ingresa tu contraseña"
+              required
+            />
+
+            <button
+              type="button"
+              className="login-ver-password"
+              onClick={() => setMostrarPassword(!mostrarPassword)}
+              aria-label={
+                mostrarPassword
+                  ? "Ocultar contraseña"
+                  : "Mostrar contraseña"
+              }
+              title={
+                mostrarPassword
+                  ? "Ocultar contraseña"
+                  : "Mostrar contraseña"
+              }
+            >
+              {mostrarPassword ? <IconoOjoOculto /> : <IconoOjo />}
+            </button>
+          </div>
+        </div>
 
         {error && (
-          <p style={{ color: "#b91c1c" }}>{error}</p>
+          <div className="login-error" role="alert">
+            {error}
+          </div>
         )}
 
         <button
           type="submit"
+          className="login-boton"
           disabled={cargando}
-          style={{
-            width: "100%",
-            background: "#087e85",
-            color: "white",
-            border: "none",
-            padding: "13px"
-          }}
         >
           {cargando ? "Ingresando..." : "Iniciar sesión"}
         </button>
+
+        <p className="login-pie">
+          Sistema de Control Patrimonial
+        </p>
       </form>
     </div>
   );

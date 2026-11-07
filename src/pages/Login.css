@@ -1,0 +1,268 @@
+
+/* ==========================================
+   INVENTARIO BUAP - LOGIN
+========================================== */
+
+.login-fondo,
+.login-fondo * {
+  box-sizing: border-box;
+}
+
+.login-fondo {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f3f6fa;
+  padding: 24px;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* TARJETA PRINCIPAL */
+
+.login-tarjeta {
+  width: 100%;
+  max-width: 440px;
+  margin: 0;
+  padding: 36px;
+  background: #ffffff;
+  border: 1px solid #e4ebf2;
+  border-radius: 20px;
+  box-shadow: 0 12px 35px rgba(15, 23, 42, 0.08);
+}
+
+/* ENCABEZADO */
+
+.login-encabezado {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.login-logo {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #0b8b92, #087e85);
+  color: #ffffff;
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.login-encabezado h1 {
+  color: #163c53;
+  font-size: 27px;
+  font-weight: 750;
+  line-height: 1.2;
+  margin: 0 0 9px;
+}
+
+.login-encabezado p {
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* CAMPOS */
+
+.login-campo {
+  width: 100%;
+  min-width: 0;
+  margin-bottom: 22px;
+}
+
+.login-campo label {
+  display: block;
+  margin-bottom: 9px;
+  color: #334155;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.login-campo > input,
+.login-password > input {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  height: 52px;
+  margin: 0;
+  padding: 0 15px;
+  border: 1px solid #cfd9e5;
+  border-radius: 10px;
+  background: #f8fafc;
+  color: #1e293b;
+  font-family: inherit;
+  font-size: 15px;
+  line-height: normal;
+  outline: none;
+  box-shadow: none;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.login-campo input::placeholder {
+  color: #94a3b8;
+}
+
+.login-campo input:focus {
+  border-color: #087e85;
+  box-shadow: 0 0 0 3px rgba(8, 126, 133, 0.12);
+}
+
+/* CONTRASEÑA Y BOTÓN DEL OJO */
+
+.login-password {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+
+.login-password > input {
+  padding-right: 57px;
+}
+
+.login-ver-password {
+  position: absolute;
+  top: 50%;
+  right: 7px;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: none;
+  transition:
+    color 0.2s ease,
+    background 0.2s ease;
+}
+
+.login-ver-password:hover {
+  background: #e8f3f4;
+  color: #087e85;
+}
+
+.login-ver-password:focus-visible {
+  outline: 2px solid #087e85;
+  outline-offset: 2px;
+}
+
+.login-icono-ojo-svg {
+  display: block;
+  width: 21px;
+  height: 21px;
+  flex-shrink: 0;
+}
+
+/* MENSAJES DE ERROR */
+
+.login-error {
+  padding: 12px 14px;
+  margin-bottom: 18px;
+  color: #b91c1c;
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+  border-radius: 9px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* BOTÓN INICIAR SESIÓN */
+
+.login-boton {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: 52px;
+  margin: 6px 0 0;
+  padding: 0 16px;
+  background: #087e85;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: none;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.login-boton:hover {
+  background: #05686e;
+}
+
+.login-boton:active {
+  transform: scale(0.99);
+}
+
+.login-boton:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* PIE DEL LOGIN */
+
+.login-pie {
+  margin: 24px 0 0;
+  color: #94a3b8;
+  text-align: center;
+  font-size: 12px;
+}
+
+/* VISTA MÓVIL */
+
+@media (max-width: 540px) {
+  .login-fondo {
+    min-height: 100dvh;
+    padding: 16px;
+  }
+
+  .login-tarjeta {
+    max-width: 100%;
+    padding: 28px 22px;
+    border-radius: 16px;
+  }
+
+  .login-logo {
+    width: 64px;
+    height: 64px;
+    font-size: 16px;
+  }
+
+  .login-encabezado h1 {
+    font-size: 24px;
+  }
+
+  .login-encabezado p {
+    font-size: 13px;
+  }
+
+  .login-campo > input,
+  .login-password > input {
+    height: 50px;
+    font-size: 16px;
+  }
+
+  .login-boton {
+    height: 50px;
+  }
+} 
